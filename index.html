@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>영어 단어 카드</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        .card-container {
+            text-align: center;
+            width: 100%;
+            padding: 20px;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .card-container.fade-out-left {
+            opacity: 0;
+            transform: translateX(-60px);
+        }
+
+        .card-container.fade-out-right {
+            opacity: 0;
+            transform: translateX(60px);
+        }
+
+        .card-container.fade-in {
+            opacity: 0;
+            transform: translateX(40px);
+        }
+
+        .progress {
+            font-size: 0.75rem;
+            color: #ccc;
+            margin-bottom: 40px;
+            letter-spacing: 1px;
+        }
+
+        .word-en {
+            font-size: 3.8rem;
+            font-weight: 800;
+            color: #000;
+            margin-bottom: 5px;
+            letter-spacing: -2px;
+            word-break: keep-all;
+            line-height: 1.1;
+        }
+
+        .word-ko {
+            font-size: 1.4rem;
+            font-weight: 400;
+            color: #777;
+            margin-bottom: 15px;
+        }
+
+        .speak-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            background: #f5f5f5;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #555;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 80px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .speak-btn:active {
+            background: #e0e0e0;
+        }
+
+        .speak-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 0 20px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 14px 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-btn.prev {
+            background: #f5f5f5;
+            color: #888;
+            border: none;
+        }
+
+        .nav-btn.prev:active {
+            background: #e8e8e8;
+        }
+
+        .nav-btn.next {
+            background: #000;
+            color: #fff;
+            border: none;
+        }
+
+        .nav-btn.next:active {
+            background: #333;
+        }
+
+        .nav-btn.disabled {
+            background: #f5f5f5;
+            color: #ddd;
+            pointer-events: none;
+        }
+
+        /* 완료 화면 */
+        .complete-container {
+            text-align: center;
+            width: 100%;
+            padding: 20px;
+            display: none;
+        }
+
+        .complete-container.show {
+            display: block;
+        }
+
+        .complete-emoji {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .complete-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 6px;
+        }
+
+        .complete-desc {
+            font-size: 1rem;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .complete-set-info {
+            font-size: 0.8rem;
+            color: #ccc;
+            margin-bottom: 36px;
+        }
+
+        .complete-btns {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .complete-btn {
+            background: none;
+            border: none;
+            padding: 12px 28px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: color 0.2s;
+        }
+
+        .complete-btn.primary {
+            color: #000;
+            font-weight: 600;
+        }
+
+        .complete-btn.secondary {
+            color: #bbb;
+            font-weight: 400;
+        }
+
+        .complete-btn:active {
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card-container" id="cardContainer">
+        <div class="progress" id="progress"></div>
+        <div class="word-en" id="wordEn"></div>
+        <div class="word-ko" id="wordKo"></div>
+
+        <button class="speak-btn" onclick="playSound()">
+            <svg viewBox="0 0 24 24">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+            발음 듣기
+        </button>
+
+        <div class="button-group">
+            <button class="nav-btn prev" id="prevBtn" onclick="prevCard()">이전</button>
+            <button class="nav-btn next" id="nextBtn" onclick="nextCard()">다음 단어 보기</button>
+        </div>
+    </div>
+
+    <div class="complete-container" id="completeContainer">
+        <div class="complete-emoji">&#x1F389;</div>
+        <div class="complete-title">잘하셨어요!</div>
+        <div class="complete-desc" id="completeDesc"></div>
+        <div class="complete-set-info" id="completeSetInfo"></div>
+        <div class="complete-btns">
+            <button class="complete-btn primary" id="completeNextBtn" onclick="goNextSet()"></button>
+            <button class="complete-btn secondary" onclick="replaySet()">다시 보기</button>
+        </div>
+    </div>
+
+    <script>
+        // tts: 발음 텍스트, lang: 'en' 영어발음 / 'ko' 한글발음 (브랜드명 등)
+        const allWords = [
+            { en: "STARBUCKS", ko: "스타벅스", tts: "스타벅스", lang: "ko" },
+            { en: "COFFEE", ko: "커피" },
+            { en: "CAFE", ko: "카페" },
+            { en: "PARIS BAGUETTE", ko: "파리바게뜨", tts: "파리바게뜨", lang: "ko" },
+            { en: "DAISO", ko: "다이소", tts: "다이소", lang: "ko" },
+            { en: "OLIVE YOUNG", ko: "올리브영", tts: "올리브영", lang: "ko" },
+            { en: "MART", ko: "마트" },
+            { en: "EMART", ko: "이마트", tts: "이마트", lang: "ko" },
+            { en: "CU", ko: "씨유", tts: "씨유", lang: "ko" },
+            { en: "GS25", ko: "지에스", tts: "지에스 이십오", lang: "ko" },
+
+            { en: "LOTTERIA", ko: "롯데리아", tts: "롯데리아", lang: "ko" },
+            { en: "BURGER KING", ko: "버거킹" },
+            { en: "SAMSUNG", ko: "삼성", tts: "삼성", lang: "ko" },
+            { en: "LG", ko: "엘지", tts: "엘지", lang: "ko" },
+            { en: "NIKE", ko: "나이키" },
+            { en: "ADIDAS", ko: "아디다스" },
+            { en: "UNIQLO", ko: "유니클로", tts: "유니클로", lang: "ko" },
+            { en: "OPEN", ko: "오픈 (열다)" },
+            { en: "CLOSE", ko: "클로즈 (닫음)" },
+            { en: "SHAMPOO", ko: "샴푸" },
+
+            { en: "CONDITIONER", ko: "컨디셔너 (린스)" },
+            { en: "BODY WASH", ko: "바디워시" },
+            { en: "HAND WASH", ko: "핸드워시" },
+            { en: "LOTION", ko: "로션" },
+            { en: "CREAM", ko: "크림" },
+            { en: "MILK", ko: "우유" },
+            { en: "JUICE", ko: "주스" },
+            { en: "MENU", ko: "메뉴" },
+            { en: "ICE", ko: "아이스 (차가운)" },
+            { en: "HOT", ko: "핫 (뜨거운)" },
+
+            { en: "LATTE", ko: "라떼" },
+            { en: "AMERICANO", ko: "아메리카노" },
+            { en: "TEA", ko: "티 (차)" },
+            { en: "ORDER", ko: "오더 (주문)" },
+            { en: "BEST", ko: "베스트 (추천)" },
+            { en: "NEW", ko: "뉴 (새로운)" },
+            { en: "OK", ko: "확인" },
+            { en: "CANCEL", ko: "취소" },
+            { en: "WIFI", ko: "와이파이" },
+            { en: "EXIT", ko: "출구 (나가는 곳)" },
+
+            { en: "ENTRANCE", ko: "입구" },
+            { en: "PUSH", ko: "푸시 (미세요)" },
+            { en: "PULL", ko: "풀 (당기세요)" },
+            { en: "ON / OFF", ko: "온 / 오프" },
+            { en: "STOP", ko: "스탑 (정지)" },
+            { en: "SALE", ko: "세일 (할인)" },
+            { en: "FREE", ko: "프리 (무료)" },
+            { en: "MADE IN KOREA", ko: "국산 (한국 제조)" },
+            { en: "TAXI", ko: "택시" },
+            { en: "BUS STOP", ko: "버스 정류장" },
+
+            { en: "SELF", ko: "셀프 (직접)" },
+            { en: "FRESH", ko: "신선한" },
+            { en: "BREAD", ko: "빵" },
+            { en: "BAKERY", ko: "베이커리 (빵집)" },
+            { en: "DRINK", ko: "음료" },
+            { en: "SIZE", ko: "사이즈" },
+            { en: "COLOR", ko: "컬러" },
+
+            { en: "AMERICANO", ko: "아메리카노" },
+            { en: "LATTE", ko: "라떼" },
+            { en: "YOGURT", ko: "요거트" },
+            { en: "CUP", ko: "컵" },
+            { en: "COUPON", ko: "쿠폰" },
+            { en: "POINT", ko: "포인트 (적립)" },
+            { en: "TOILET", ko: "화장실" },
+            { en: "BUS", ko: "버스" },
+            { en: "TAXI", ko: "택시" },
+            { en: "STOP", ko: "스탑 (정지)" },
+            { en: "CARD", ko: "카드" },
+            { en: "PHOTO", ko: "사진" },
+            { en: "NEXT", ko: "다음" },
+            { en: "BACK", ko: "뒤로 (돌아가기)" }
+        ];
+
+        // 셔플 (Fisher-Yates)
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        shuffle(allWords);
+
+        const SET_SIZE = 10;
+        const totalSets = Math.ceil(allWords.length / SET_SIZE);
+
+        let currentSet = 0;
+        let currentCard = 0;
+        let isAnimating = false;
+        let touchStartX = 0;
+
+        const container = document.getElementById('cardContainer');
+        const completeEl = document.getElementById('completeContainer');
+
+        function getSetWords() {
+            const start = currentSet * SET_SIZE;
+            return allWords.slice(start, start + SET_SIZE);
+        }
+
+        function render() {
+            const words = getSetWords();
+            const w = words[currentCard];
+            const globalIndex = currentSet * SET_SIZE + currentCard + 1;
+
+            document.getElementById('wordEn').textContent = w.en;
+            document.getElementById('wordKo').textContent = w.ko;
+            document.getElementById('progress').textContent =
+                `${currentCard + 1} / ${words.length}`;
+
+            document.getElementById('prevBtn').className =
+                currentCard === 0 ? 'nav-btn prev disabled' : 'nav-btn prev';
+        }
+
+        function playSound() {
+            window.speechSynthesis.cancel();
+            const w = getSetWords()[currentCard];
+            const isKo = w.lang === 'ko';
+            const u = new SpeechSynthesisUtterance(isKo ? w.tts : w.en);
+            u.lang = isKo ? 'ko-KR' : 'en-US';
+            u.rate = 0.75;
+            window.speechSynthesis.speak(u);
+        }
+
+        function goTo(newIndex, direction) {
+            if (isAnimating) return;
+            isAnimating = true;
+
+            const exitClass = direction === 'left' ? 'fade-out-left' : 'fade-out-right';
+            container.classList.add(exitClass);
+
+            setTimeout(() => {
+                currentCard = newIndex;
+                render();
+                container.classList.remove(exitClass);
+                container.classList.add('fade-in');
+                void container.offsetWidth;
+                container.classList.remove('fade-in');
+
+                setTimeout(() => {
+                    isAnimating = false;
+                    playSound();
+                }, 300);
+            }, 300);
+        }
+
+        function nextCard() {
+            const words = getSetWords();
+            if (currentCard < words.length - 1) {
+                goTo(currentCard + 1, 'left');
+            } else {
+                showComplete();
+            }
+        }
+
+        function prevCard() {
+            if (currentCard > 0) {
+                goTo(currentCard - 1, 'right');
+            }
+        }
+
+        function showComplete() {
+            if (isAnimating) return;
+            isAnimating = true;
+
+            const isLastSet = currentSet >= totalSets - 1;
+            const setStart = currentSet * SET_SIZE + 1;
+            const setEnd = Math.min((currentSet + 1) * SET_SIZE, allWords.length);
+
+            document.getElementById('completeDesc').textContent =
+                `${getSetWords().length}개 단어를 학습했어요`;
+            document.getElementById('completeSetInfo').textContent =
+                `${currentSet + 1}세트 완료 (${setStart}~${setEnd}번 단어)`;
+
+            const nextBtn = document.getElementById('completeNextBtn');
+            if (isLastSet) {
+                nextBtn.textContent = '처음부터 다시';
+            } else {
+                nextBtn.textContent = '다음으로';
+            }
+
+            container.classList.add('fade-out-left');
+
+            setTimeout(() => {
+                container.style.display = 'none';
+                completeEl.classList.add('show');
+                isAnimating = false;
+            }, 300);
+        }
+
+        function goNextSet() {
+            const isLastSet = currentSet >= totalSets - 1;
+            if (isLastSet) {
+                currentSet = 0;
+            } else {
+                currentSet++;
+            }
+            currentCard = 0;
+            startSet();
+        }
+
+        function replaySet() {
+            currentCard = 0;
+            startSet();
+        }
+
+        function startSet() {
+            render();
+            completeEl.classList.remove('show');
+            container.style.display = '';
+            container.classList.remove('fade-out-left', 'fade-out-right');
+            setTimeout(() => playSound(), 300);
+        }
+
+        // 스와이프
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const diff = touchStartX - e.changedTouches[0].screenX;
+            if (Math.abs(diff) < 50) return;
+            if (diff > 0) nextCard();
+            else prevCard();
+        }, { passive: true });
+
+        // 키보드
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextCard();
+            if (e.key === 'ArrowLeft') prevCard();
+        });
+
+        // 초기화
+        render();
+        setTimeout(() => playSound(), 500);
+    </script>
+
+</body>
+</html>
