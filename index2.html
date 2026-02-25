@@ -388,7 +388,7 @@
         function startApp() {
             unlockAudio();
             document.getElementById('startScreen').style.display = 'none';
-            container.style.display = '';
+            container.style.display = 'block';
             render();
             playSound();
         }
@@ -515,7 +515,7 @@
         function startSet(withSound) {
             render();
             completeEl.classList.remove('show');
-            container.style.display = '';
+            container.style.display = 'block';
             container.classList.remove('fade-out-left', 'fade-out-right');
             if (withSound) playSound();
         }
