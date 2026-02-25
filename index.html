@@ -21,13 +21,16 @@
             overflow: hidden; -webkit-user-select: none;
         }
 
+        /* 시작 화면 */
         .start-screen { text-align: center; z-index: 100; }
         .start-btn {
             background: var(--accent); color: #fff; border: none;
             padding: 16px 50px; border-radius: 12px; font-size: 1.1rem;
             font-weight: 600; cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
 
+        /* 메인 컨테이너 */
         .app-container {
             display: none; flex-direction: column;
             width: 100%; height: 100%; max-width: 500px;
@@ -38,39 +41,43 @@
         .main-content {
             flex: 1; display: flex; flex-direction: column;
             justify-content: center; align-items: center;
+            margin-top: -30px;
         }
 
         .card-area {
-            text-align: center; width: 100%; margin-bottom: 30px;
+            text-align: center; width: 100%;
             transition: transform 0.25s ease-out, opacity 0.25s;
         }
 
         .word-en {
             font-size: 3.2rem; font-weight: 800; margin: 0;
-            letter-spacing: -1px; line-height: 1.2;
+            letter-spacing: -1.5px; line-height: 1.1;
         }
 
         .word-ko {
-            font-size: 1.2rem; color: var(--text-sub); margin: 8px 0 20px 0;
+            font-size: 1.25rem; color: var(--text-sub); margin: 10px 0 25px 0;
         }
 
-        /* 발음 버튼을 단어 바로 아래로 배치 */
+        /* 발음 듣기 버튼 (단어 바로 아래) */
         .speak-btn {
             background: var(--button-bg); border: none;
-            padding: 12px 24px; border-radius: 25px;
-            font-size: 0.95rem; font-weight: 500;
+            padding: 12px 26px; border-radius: 25px;
+            font-size: 1rem; font-weight: 600;
             display: inline-flex; align-items: center; gap: 8px;
-            cursor: pointer; -webkit-tap-highlight-color: transparent;
+            cursor: pointer; color: var(--text-main);
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* 하단 고정 네비게이션 */
+        .speak-btn:active { background: #e5e5ea; }
+
+        /* 하단 네비게이션 버튼 (위치 20px 상향 조정) */
         .nav-controls {
-            padding: 20px 20px 40px;
-            display: flex; gap: 10px;
+            padding: 0 20px 60px; /* 하단 여백을 60px로 늘려 버튼을 올림 */
+            display: flex; gap: 12px;
         }
 
         .nav-btn {
-            flex: 1; padding: 18px; border-radius: 14px;
+            flex: 1; padding: 18px; border-radius: 15px;
             font-size: 1rem; font-weight: 700; border: none; cursor: pointer;
             -webkit-tap-highlight-color: transparent;
         }
@@ -79,7 +86,7 @@
         .btn-next { background: var(--accent); color: #fff; }
         .btn-disabled { opacity: 0.2; pointer-events: none; }
 
-        /* 애니메이션 효과 */
+        /* 애니메이션 */
         .slide-next { opacity: 0; transform: translateX(-30px); }
         .slide-prev { opacity: 0; transform: translateX(30px); }
 
@@ -93,8 +100,8 @@
 <body>
 
     <div class="start-screen" id="startScreen">
-        <h1 style="margin-bottom: 10px;">오늘의 영어</h1>
-        <p style="color:#999; margin-bottom: 30px;">소리가 안 들리면 볼륨을 확인하고<br>'학습 시작'을 눌러주세요.</p>
+        <h1 style="margin-bottom: 10px;">오늘의 영어 단어</h1>
+        <p style="color:#999; margin-bottom: 40px; line-height: 1.4;">단어 카드가 나오면<br><b>'발음 듣기'</b>를 눌러 소리를 들어보세요.</p>
         <button class="start-btn" onclick="initApp()">학습 시작</button>
     </div>
 
@@ -106,8 +113,8 @@
                 <div class="word-en" id="wordEn">AMERICANO</div>
                 <div class="word-ko" id="wordKo">아메리카노</div>
                 
-                <button class="speak-btn" onclick="handleSpeakClick(event)">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                <button class="speak-btn" id="playBtn" onclick="playCurrentWord()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
                     발음 듣기
                 </button>
             </div>
@@ -120,9 +127,9 @@
     </div>
 
     <div class="complete-screen" id="completeScreen">
-        <span style="font-size: 3rem;">✨</span>
-        <h2>학습 완료!</h2>
-        <button class="nav-btn btn-next" style="width: 200px; margin-top:20px;" onclick="restartApp()">한 번 더 하기</button>
+        <span style="font-size: 3.5rem;">👍</span>
+        <h2 style="margin-top: 20px;">공부 완료!</h2>
+        <button class="nav-btn btn-next" style="width: 200px; margin-top:30px;" onclick="location.reload()">처음부터 다시</button>
     </div>
 
     <script>
@@ -155,8 +162,8 @@
         const synth = window.speechSynthesis;
 
         function initApp() {
-            // 1. 사파리 오디오 락 즉시 해제 (가장 중요)
-            const unlock = new SpeechSynthesisUtterance(" ");
+            // 사파리 엔진 초기 활성화 (빈 음성 재생)
+            const unlock = new SpeechSynthesisUtterance("");
             synth.speak(unlock);
 
             document.getElementById('startScreen').style.display = 'none';
@@ -165,9 +172,7 @@
             shuffle(allWords);
             currentWords = allWords.slice(0, 10);
             renderCard();
-            
-            // 첫 단어 발음 (약간의 지연을 주어 엔진 준비 시간 확보)
-            setTimeout(playCurrentWord, 300);
+            // 자동 재생을 호출하지 않음 (사용자 클릭 유도)
         }
 
         function renderCard() {
@@ -179,29 +184,25 @@
             document.getElementById('nextBtn').textContent = (currentIndex === currentWords.length - 1) ? "결과 보기" : "다음 단어 보기";
         }
 
+        // 사용자가 직접 버튼을 클릭했을 때만 호출되는 함수
         function playCurrentWord() {
-            // 이미 말하고 있다면 중단
-            synth.cancel();
+            synth.cancel(); // 진행 중인 소리 중단
 
             const word = currentWords[currentIndex];
             const utter = new SpeechSynthesisUtterance(word.en);
             
-            // 언어별 최적화
+            // 영어와 한국어 발음 구분
             if (word.lang === 'ko') {
                 utter.lang = 'ko-KR';
+                utter.rate = 1.0;
             } else {
                 utter.lang = 'en-US';
-                utter.rate = 1.0; // 아이폰 사파리에서 가장 자연스러운 속도
+                utter.rate = 0.95; // 자연스러운 속도
+                utter.pitch = 1.0;
             }
 
-            // 목소리 로딩 확인 및 재생
+            // 직접적인 사용자 액션(click) 안에서 실행되므로 사파리에서 허용됨
             synth.speak(utter);
-        }
-
-        // 사용자가 직접 버튼을 누른 경우의 핸들러
-        function handleSpeakClick(e) {
-            if(e) e.preventDefault();
-            playCurrentWord();
         }
 
         function nextCard() {
@@ -210,7 +211,6 @@
                 switchCard('slide-next', () => {
                     currentIndex++;
                     renderCard();
-                    playCurrentWord();
                 });
             } else {
                 document.getElementById('completeScreen').style.display = 'flex';
@@ -222,7 +222,6 @@
             switchCard('slide-prev', () => {
                 currentIndex--;
                 renderCard();
-                playCurrentWord();
             });
         }
 
@@ -238,10 +237,6 @@
             }, 250);
         }
 
-        function restartApp() {
-            location.reload();
-        }
-
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -249,14 +244,13 @@
             }
         }
 
-        // 스와이프 방지 및 지원
+        // 스와이프
         let touchStartX = 0;
         document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
         document.addEventListener('touchend', e => {
             const diff = touchStartX - e.changedTouches[0].screenX;
             if (Math.abs(diff) > 70) diff > 0 ? nextCard() : prevCard();
         }, {passive: true});
-
     </script>
 </body>
 </html>
