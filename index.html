@@ -15,9 +15,10 @@
             background-color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             overflow: hidden;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
-        /* 시작 화면 */
         .start-screen {
             text-align: center;
             padding: 20px;
@@ -49,10 +50,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .start-btn:active {
-            background: #333;
-        }
-
         .card-container {
             text-align: center;
             width: 100%;
@@ -61,20 +58,9 @@
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-        .card-container.fade-out-left {
-            opacity: 0;
-            transform: translateX(-60px);
-        }
-
-        .card-container.fade-out-right {
-            opacity: 0;
-            transform: translateX(60px);
-        }
-
-        .card-container.fade-in {
-            opacity: 0;
-            transform: translateX(40px);
-        }
+        .card-container.fade-out-left { opacity: 0; transform: translateX(-60px); }
+        .card-container.fade-out-right { opacity: 0; transform: translateX(60px); }
+        .card-container.fade-in { opacity: 0; transform: translateX(40px); }
 
         .progress {
             font-size: 0.75rem;
@@ -107,24 +93,13 @@
             gap: 5px;
             background: #f5f5f5;
             border: none;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 20px;
             font-size: 0.85rem;
             color: #555;
             cursor: pointer;
-            transition: background 0.2s;
             margin-bottom: 80px;
             -webkit-tap-highlight-color: transparent;
-        }
-
-        .speak-btn:active {
-            background: #e0e0e0;
-        }
-
-        .speak-btn svg {
-            width: 14px;
-            height: 14px;
-            fill: currentColor;
         }
 
         .button-group {
@@ -137,111 +112,31 @@
 
         .nav-btn {
             flex: 1;
-            padding: 14px 0;
+            padding: 16px 0;
             font-size: 0.95rem;
             font-weight: 600;
             border-radius: 10px;
             cursor: pointer;
+            border: none;
             -webkit-tap-highlight-color: transparent;
-            transition: all 0.2s;
         }
 
-        .nav-btn.prev {
-            background: #f5f5f5;
-            color: #888;
-            border: none;
-        }
+        .nav-btn.prev { background: #f5f5f5; color: #888; }
+        .nav-btn.next { background: #000; color: #fff; }
+        .nav-btn.disabled { background: #f5f5f5; color: #ddd; pointer-events: none; }
 
-        .nav-btn.prev:active {
-            background: #e8e8e8;
-        }
-
-        .nav-btn.next {
-            background: #000;
-            color: #fff;
-            border: none;
-        }
-
-        .nav-btn.next:active {
-            background: #333;
-        }
-
-        .nav-btn.disabled {
-            background: #f5f5f5;
-            color: #ddd;
-            pointer-events: none;
-        }
-
-        .complete-container {
-            text-align: center;
-            width: 100%;
-            padding: 20px;
-            display: none;
-        }
-
-        .complete-container.show {
-            display: block;
-        }
-
-        .complete-emoji {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .complete-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #000;
-            margin-bottom: 6px;
-        }
-
-        .complete-desc {
-            font-size: 1rem;
-            color: #999;
-            margin-bottom: 10px;
-        }
-
-        .complete-set-info {
-            font-size: 0.8rem;
-            color: #ccc;
-            margin-bottom: 36px;
-        }
-
-        .complete-btns {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .complete-btn {
-            background: none;
-            border: none;
-            padding: 12px 28px;
-            font-size: 0.95rem;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            transition: color 0.2s;
-        }
-
-        .complete-btn.primary {
-            color: #000;
-            font-weight: 600;
-        }
-
-        .complete-btn.secondary {
-            color: #bbb;
-            font-weight: 400;
-        }
-
-        .complete-btn:active {
-            color: #555;
-        }
+        .complete-container { text-align: center; width: 100%; padding: 20px; display: none; }
+        .complete-container.show { display: block; }
+        .complete-emoji { font-size: 48px; margin-bottom: 16px; }
+        .complete-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
+        .complete-btns { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 30px; }
+        .complete-btn { background: none; border: none; padding: 12px; font-size: 0.95rem; cursor: pointer; }
+        .complete-btn.primary { color: #000; font-weight: 600; }
+        .complete-btn.secondary { color: #bbb; }
     </style>
 </head>
 <body>
 
-    <!-- 시작 화면 -->
     <div class="start-screen" id="startScreen">
         <div class="start-title">오늘의 영어 단어</div>
         <div class="start-desc">매일 보는 영어,<br>이제 읽을 수 있어요</div>
@@ -254,7 +149,7 @@
         <div class="word-ko" id="wordKo"></div>
 
         <button class="speak-btn" onclick="playSound()">
-            <svg viewBox="0 0 24 24">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                 <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
             </svg>
             발음 듣기
@@ -267,10 +162,9 @@
     </div>
 
     <div class="complete-container" id="completeContainer">
-        <div class="complete-emoji">&#x1F389;</div>
+        <div class="complete-emoji">🎉</div>
         <div class="complete-title">잘하셨어요!</div>
-        <div class="complete-desc" id="completeDesc"></div>
-        <div class="complete-set-info" id="completeSetInfo"></div>
+        <div id="completeDesc" style="color:#999; margin-bottom: 20px;"></div>
         <div class="complete-btns">
             <button class="complete-btn primary" id="completeNextBtn" onclick="goNextSet()"></button>
             <button class="complete-btn secondary" onclick="replaySet()">다시 보기</button>
@@ -289,7 +183,6 @@
             { en: "EMART", ko: "이마트", tts: "이마트", lang: "ko" },
             { en: "CU", ko: "씨유", tts: "씨유", lang: "ko" },
             { en: "GS25", ko: "지에스", tts: "지에스 이십오", lang: "ko" },
-
             { en: "LOTTERIA", ko: "롯데리아", tts: "롯데리아", lang: "ko" },
             { en: "BURGER KING", ko: "버거킹" },
             { en: "SAMSUNG", ko: "삼성", tts: "삼성", lang: "ko" },
@@ -300,7 +193,6 @@
             { en: "OPEN", ko: "오픈 (열다)" },
             { en: "CLOSE", ko: "클로즈 (닫음)" },
             { en: "SHAMPOO", ko: "샴푸" },
-
             { en: "CONDITIONER", ko: "컨디셔너 (린스)" },
             { en: "BODY WASH", ko: "바디워시" },
             { en: "HAND WASH", ko: "핸드워시" },
@@ -311,7 +203,6 @@
             { en: "MENU", ko: "메뉴" },
             { en: "ICE", ko: "아이스 (차가운)" },
             { en: "HOT", ko: "핫 (뜨거운)" },
-
             { en: "LATTE", ko: "라떼" },
             { en: "AMERICANO", ko: "아메리카노" },
             { en: "TEA", ko: "티 (차)" },
@@ -322,7 +213,6 @@
             { en: "CANCEL", ko: "취소" },
             { en: "WIFI", ko: "와이파이" },
             { en: "EXIT", ko: "출구 (나가는 곳)" },
-
             { en: "ENTRANCE", ko: "입구" },
             { en: "PUSH", ko: "푸시 (미세요)" },
             { en: "PULL", ko: "풀 (당기세요)" },
@@ -333,7 +223,6 @@
             { en: "MADE IN KOREA", ko: "국산 (한국 제조)" },
             { en: "TAXI", ko: "택시" },
             { en: "BUS STOP", ko: "버스 정류장" },
-
             { en: "SELF", ko: "셀프 (직접)" },
             { en: "FRESH", ko: "신선한" },
             { en: "BREAD", ko: "빵" },
@@ -341,17 +230,12 @@
             { en: "DRINK", ko: "음료" },
             { en: "SIZE", ko: "사이즈" },
             { en: "COLOR", ko: "컬러" },
-
-            { en: "AMERICANO", ko: "아메리카노" },
-            { en: "LATTE", ko: "라떼" },
             { en: "YOGURT", ko: "요거트" },
             { en: "CUP", ko: "컵" },
             { en: "COUPON", ko: "쿠폰" },
             { en: "POINT", ko: "포인트 (적립)" },
             { en: "TOILET", ko: "화장실" },
             { en: "BUS", ko: "버스" },
-            { en: "TAXI", ko: "택시" },
-            { en: "STOP", ko: "스탑 (정지)" },
             { en: "CARD", ko: "카드" },
             { en: "PHOTO", ko: "사진" },
             { en: "NEXT", ko: "다음" },
@@ -370,26 +254,19 @@
 
         const SET_SIZE = 10;
         const totalSets = Math.ceil(allWords.length / SET_SIZE);
-
         let currentSet = 0;
         let currentCard = 0;
         let isAnimating = false;
         let touchStartX = 0;
-        let pendingSound = false;
 
         const container = document.getElementById('cardContainer');
         const completeEl = document.getElementById('completeContainer');
 
-        // Safari TTS 잠금 해제: 사용자 터치 시 빈 음성 한번 실행
-        function unlockTTS() {
-            const u = new SpeechSynthesisUtterance('');
-            u.volume = 0;
-            window.speechSynthesis.speak(u);
-        }
-
-        // 시작 버튼 (사용자 터치로 TTS 잠금 해제)
         function startApp() {
-            unlockTTS();
+            // iOS 사파리 음성 엔진 활성화 (빈 음성 재생)
+            const msg = new SpeechSynthesisUtterance("");
+            window.speechSynthesis.speak(msg);
+            
             document.getElementById('startScreen').style.display = 'none';
             container.style.display = 'block';
             render();
@@ -404,144 +281,108 @@
         function render() {
             const words = getSetWords();
             const w = words[currentCard];
-
             document.getElementById('wordEn').textContent = w.en;
             document.getElementById('wordKo').textContent = w.ko;
-            document.getElementById('progress').textContent =
-                `${currentCard + 1} / ${words.length}`;
-
-            document.getElementById('prevBtn').className =
-                currentCard === 0 ? 'nav-btn prev disabled' : 'nav-btn prev';
+            document.getElementById('progress').textContent = `${currentCard + 1} / ${words.length}`;
+            document.getElementById('prevBtn').className = currentCard === 0 ? 'nav-btn prev disabled' : 'nav-btn prev';
         }
 
         function playSound() {
-            window.speechSynthesis.cancel();
+            window.speechSynthesis.cancel(); // 기존 재생 중지
+
             const w = getSetWords()[currentCard];
             const isKo = w.lang === 'ko';
-            const u = new SpeechSynthesisUtterance(isKo ? w.tts : w.en);
-            u.lang = isKo ? 'ko-KR' : 'en-US';
-            u.rate = 0.75;
-            window.speechSynthesis.speak(u);
+            const text = isKo ? w.tts : w.en;
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = isKo ? 'ko-KR' : 'en-US';
+            utterance.rate = 0.8;
+            
+            window.speechSynthesis.speak(utterance);
         }
 
-        // Safari에서는 setTimeout 안의 TTS가 막힘
-        // → 버튼 클릭 시 바로 소리 재생, 애니메이션은 별도 진행
-        function goTo(newIndex, direction, fromGesture) {
+        function goTo(newIndex, direction) {
             if (isAnimating) return;
-            isAnimating = true;
-
-            // 다음 카드 데이터 미리 세팅해서 즉시 발음
+            
+            // iOS: 클릭 이벤트 콜백 안에서 바로 재생해야 함
             currentCard = newIndex;
+            playSound(); 
 
-            if (fromGesture) {
-                render();
-                playSound();
-            } else {
-                pendingSound = true;
-            }
+            isAnimating = true;
+            render();
 
             const exitClass = direction === 'left' ? 'fade-out-left' : 'fade-out-right';
             container.classList.add(exitClass);
 
             setTimeout(() => {
-                if (!fromGesture) {
-                    render();
-                }
                 container.classList.remove(exitClass);
                 container.classList.add('fade-in');
                 void container.offsetWidth;
                 container.classList.remove('fade-in');
-
-                setTimeout(() => {
-                    isAnimating = false;
-                    if (pendingSound) {
-                        pendingSound = false;
-                    }
-                }, 300);
+                setTimeout(() => { isAnimating = false; }, 300);
             }, 300);
         }
 
         function nextCard() {
             const words = getSetWords();
-            const nextIndex = currentCard + 1;
             if (currentCard < words.length - 1) {
-                goTo(nextIndex, 'left', true);
-            } else if (currentCard === words.length - 1 && !isAnimating) {
+                goTo(currentCard + 1, 'left');
+            } else {
                 showComplete();
             }
         }
 
         function prevCard() {
-            const prevIndex = currentCard - 1;
             if (currentCard > 0) {
-                goTo(prevIndex, 'right', true);
+                goTo(currentCard - 1, 'right');
             }
         }
 
         function showComplete() {
-            if (isAnimating) return;
-            isAnimating = true;
-
             const isLastSet = currentSet >= totalSets - 1;
-            const setStart = currentSet * SET_SIZE + 1;
-            const setEnd = Math.min((currentSet + 1) * SET_SIZE, allWords.length);
-
-            document.getElementById('completeDesc').textContent =
-                `${getSetWords().length}개 단어를 학습했어요`;
-            document.getElementById('completeSetInfo').textContent =
-                `${currentSet + 1}세트 완료 (${setStart}~${setEnd}번 단어)`;
-
+            document.getElementById('completeDesc').textContent = `${getSetWords().length}개 단어 학습 완료!`;
             const nextBtn = document.getElementById('completeNextBtn');
-            nextBtn.textContent = isLastSet ? '처음부터 다시' : '다음으로';
-
-            container.classList.add('fade-out-left');
-
-            setTimeout(() => {
-                container.style.display = 'none';
-                completeEl.classList.add('show');
-                isAnimating = false;
-            }, 300);
+            nextBtn.textContent = isLastSet ? '처음부터 다시 시작' : '다음 세트 공부하기';
+            
+            container.style.display = 'none';
+            completeEl.classList.add('show');
         }
 
         function goNextSet() {
-            const isLastSet = currentSet >= totalSets - 1;
-            currentSet = isLastSet ? 0 : currentSet + 1;
+            if (currentSet >= totalSets - 1) {
+                currentSet = 0;
+                shuffle(allWords);
+            } else {
+                currentSet++;
+            }
             currentCard = 0;
-            if (isLastSet) shuffle(allWords);
-            startSet(true);
+            startSet();
         }
 
         function replaySet() {
             currentCard = 0;
-            startSet(true);
+            startSet();
         }
 
-        function startSet(withSound) {
-            render();
+        function startSet() {
             completeEl.classList.remove('show');
             container.style.display = 'block';
             container.classList.remove('fade-out-left', 'fade-out-right');
-            if (withSound) playSound();
+            render();
+            playSound();
         }
 
-        // 스와이프
-        document.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
+        document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
         document.addEventListener('touchend', (e) => {
             const diff = touchStartX - e.changedTouches[0].screenX;
             if (Math.abs(diff) < 50) return;
-            if (diff > 0) nextCard();
-            else prevCard();
+            if (diff > 0) nextCard(); else prevCard();
         }, { passive: true });
 
-        // 키보드
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight') nextCard();
             if (e.key === 'ArrowLeft') prevCard();
         });
     </script>
-
 </body>
 </html>
