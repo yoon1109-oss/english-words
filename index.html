@@ -139,7 +139,7 @@
 
     <div class="start-screen" id="startScreen">
         <div class="start-title">오늘의 영어 단어</div>
-        <div class="start-desc">매일 보는 영어,<br>이제 읽을 수 있어요</div>
+        <div class="start-desc">원어민 발음으로 배우는<br>생활 필수 영단어</div>
         <button class="start-btn" onclick="startApp()">학습 시작</button>
     </div>
 
@@ -163,7 +163,7 @@
 
     <div class="complete-container" id="completeContainer">
         <div class="complete-emoji">🎉</div>
-        <div class="complete-title">잘하셨어요!</div>
+        <div class="complete-title">학습을 마쳤습니다!</div>
         <div id="completeDesc" style="color:#999; margin-bottom: 20px;"></div>
         <div class="complete-btns">
             <button class="complete-btn primary" id="completeNextBtn" onclick="goNextSet()"></button>
@@ -263,7 +263,7 @@
         const completeEl = document.getElementById('completeContainer');
 
         function startApp() {
-            // iOS 사파리 음성 엔진 활성화 (빈 음성 재생)
+            // iOS 잠금 해제 및 음성 엔진 초기화
             const msg = new SpeechSynthesisUtterance("");
             window.speechSynthesis.speak(msg);
             
@@ -288,25 +288,32 @@
         }
 
         function playSound() {
-            window.speechSynthesis.cancel(); // 기존 재생 중지
+            window.speechSynthesis.cancel(); 
 
             const w = getSetWords()[currentCard];
+            // 핵심 로직: 데이터에 lang: "ko"가 있으면 한국어, 없으면 영어 발음
             const isKo = w.lang === 'ko';
-            const text = isKo ? w.tts : w.en;
+            const textToRead = isKo ? (w.tts || w.ko) : w.en;
             
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = isKo ? 'ko-KR' : 'en-US';
-            utterance.rate = 0.8;
+            const utterance = new SpeechSynthesisUtterance(textToRead);
+            
+            // 언어 설정
+            if (isKo) {
+                utterance.lang = 'ko-KR';
+                utterance.rate = 0.9; // 한국어는 자연스럽게
+            } else {
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8; // 원어민 발음을 잘 듣기 위해 약간 천천히
+                utterance.pitch = 1;
+            }
             
             window.speechSynthesis.speak(utterance);
         }
 
         function goTo(newIndex, direction) {
             if (isAnimating) return;
-            
-            // iOS: 클릭 이벤트 콜백 안에서 바로 재생해야 함
             currentCard = newIndex;
-            playSound(); 
+            playSound(); // 즉시 재생하여 사파리 차단 방지
 
             isAnimating = true;
             render();
@@ -340,9 +347,9 @@
 
         function showComplete() {
             const isLastSet = currentSet >= totalSets - 1;
-            document.getElementById('completeDesc').textContent = `${getSetWords().length}개 단어 학습 완료!`;
+            document.getElementById('completeDesc').textContent = `${getSetWords().length}개 단어를 모두 익혔습니다!`;
             const nextBtn = document.getElementById('completeNextBtn');
-            nextBtn.textContent = isLastSet ? '처음부터 다시 시작' : '다음 세트 공부하기';
+            nextBtn.textContent = isLastSet ? '첫 세트로 돌아가기' : '다음 세트 공부하기';
             
             container.style.display = 'none';
             completeEl.classList.add('show');
@@ -372,6 +379,7 @@
             playSound();
         }
 
+        // 스와이프 기능
         document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
         document.addEventListener('touchend', (e) => {
             const diff = touchStartX - e.changedTouches[0].screenX;
@@ -379,6 +387,7 @@
             if (diff > 0) nextCard(); else prevCard();
         }, { passive: true });
 
+        // 키보드 지원
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight') nextCard();
             if (e.key === 'ArrowLeft') prevCard();
