@@ -10,7 +10,7 @@
             --text-main: #000000;
             --text-sub: #888888;
             --accent: #000000;
-            --button-bg: #f5f5f5;
+            --button-bg: #f2f2f7;
         }
 
         body {
@@ -21,61 +21,52 @@
             overflow: hidden; -webkit-user-select: none;
         }
 
-        /* 시작 화면 */
         .start-screen { text-align: center; z-index: 100; }
-        .start-title { font-size: 2rem; font-weight: 800; margin-bottom: 10px; }
         .start-btn {
             background: var(--accent); color: #fff; border: none;
             padding: 16px 50px; border-radius: 12px; font-size: 1.1rem;
             font-weight: 600; cursor: pointer;
         }
 
-        /* 메인 컨테이너 */
         .app-container {
             display: none; flex-direction: column;
             width: 100%; height: 100%; max-width: 500px;
         }
 
-        .header { padding: 20px; text-align: center; color: #ccc; font-size: 0.8rem; }
+        .header { padding: 15px; text-align: center; color: #ccc; font-size: 0.8rem; }
 
-        /* 카드 및 버튼 영역 (위치 상향 조정) */
         .main-content {
-            flex: 1;
-            display: flex; flex-direction: column;
-            justify-content: center; /* 중앙 정렬 */
-            align-items: center;
-            margin-top: -50px; /* 전체적으로 약간 위로 올림 */
+            flex: 1; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
         }
 
-        .word-box {
-            text-align: center; width: 100%;
-            transition: all 0.3s ease-out;
+        .card-area {
+            text-align: center; width: 100%; margin-bottom: 30px;
+            transition: transform 0.25s ease-out, opacity 0.25s;
         }
 
         .word-en {
-            font-size: 3.5rem; font-weight: 800; margin-bottom: 8px;
-            letter-spacing: -1.5px;
+            font-size: 3.2rem; font-weight: 800; margin: 0;
+            letter-spacing: -1px; line-height: 1.2;
         }
 
         .word-ko {
-            font-size: 1.3rem; color: var(--text-sub); margin-bottom: 25px;
+            font-size: 1.2rem; color: var(--text-sub); margin: 8px 0 20px 0;
         }
 
-        /* 컨트롤 영역 (단어와 가깝게 배치) */
-        .controls {
-            width: 100%; padding: 0 20px;
-            display: flex; flex-direction: column; align-items: center; gap: 15px;
-        }
-
+        /* 발음 버튼을 단어 바로 아래로 배치 */
         .speak-btn {
             background: var(--button-bg); border: none;
-            padding: 10px 22px; border-radius: 25px;
-            font-size: 0.9rem; display: flex; align-items: center; gap: 6px;
+            padding: 12px 24px; border-radius: 25px;
+            font-size: 0.95rem; font-weight: 500;
+            display: inline-flex; align-items: center; gap: 8px;
             cursor: pointer; -webkit-tap-highlight-color: transparent;
         }
 
-        .nav-group {
-            display: flex; gap: 10px; width: 100%; max-width: 360px;
+        /* 하단 고정 네비게이션 */
+        .nav-controls {
+            padding: 20px 20px 40px;
+            display: flex; gap: 10px;
         }
 
         .nav-btn {
@@ -88,10 +79,9 @@
         .btn-next { background: var(--accent); color: #fff; }
         .btn-disabled { opacity: 0.2; pointer-events: none; }
 
-        /* 애니메이션 */
-        .slide-left { opacity: 0; transform: translateX(-30px); }
-        .slide-right { opacity: 0; transform: translateX(30px); }
-        .slide-in { opacity: 0; transform: translateX(20px); }
+        /* 애니메이션 효과 */
+        .slide-next { opacity: 0; transform: translateX(-30px); }
+        .slide-prev { opacity: 0; transform: translateX(30px); }
 
         .complete-screen {
             display: none; position: absolute; inset: 0;
@@ -103,8 +93,8 @@
 <body>
 
     <div class="start-screen" id="startScreen">
-        <div class="start-title">오늘의 단어</div>
-        <p style="color:#999; margin-bottom: 40px;">아이폰 사파리에 최적화된<br>원어민 발음 학습</p>
+        <h1 style="margin-bottom: 10px;">오늘의 영어</h1>
+        <p style="color:#999; margin-bottom: 30px;">소리가 안 들리면 볼륨을 확인하고<br>'학습 시작'을 눌러주세요.</p>
         <button class="start-btn" onclick="initApp()">학습 시작</button>
     </div>
 
@@ -112,29 +102,27 @@
         <div class="header" id="progressIndicator">1 / 10</div>
         
         <div class="main-content">
-            <div class="word-box" id="wordBox">
+            <div class="card-area" id="cardArea">
                 <div class="word-en" id="wordEn">AMERICANO</div>
                 <div class="word-ko" id="wordKo">아메리카노</div>
-            </div>
-
-            <div class="controls">
-                <button class="speak-btn" onclick="playCurrentWord()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                
+                <button class="speak-btn" onclick="handleSpeakClick(event)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
                     발음 듣기
                 </button>
-                <div class="nav-group">
-                    <button class="nav-btn btn-prev" id="prevBtn" onclick="prevCard()">이전</button>
-                    <button class="nav-btn btn-next" id="nextBtn" onclick="nextCard()">다음 단어 보기</button>
-                </div>
             </div>
+        </div>
+
+        <div class="nav-controls">
+            <button class="nav-btn btn-prev" id="prevBtn" onclick="prevCard()">이전</button>
+            <button class="nav-btn btn-next" id="nextBtn" onclick="nextCard()">다음 단어 보기</button>
         </div>
     </div>
 
     <div class="complete-screen" id="completeScreen">
-        <span style="font-size: 3rem;">🎉</span>
-        <h2 style="margin-top: 15px;">완료했습니다!</h2>
-        <p id="resultText" style="color: #999; margin-bottom: 30px;"></p>
-        <button class="nav-btn btn-next" style="width: 220px;" onclick="restartApp()">다음 세트 공부하기</button>
+        <span style="font-size: 3rem;">✨</span>
+        <h2>학습 완료!</h2>
+        <button class="nav-btn btn-next" style="width: 200px; margin-top:20px;" onclick="restartApp()">한 번 더 하기</button>
     </div>
 
     <script>
@@ -163,32 +151,23 @@
 
         let currentWords = [];
         let currentIndex = 0;
-        let setNumber = 0;
         let isAnimating = false;
-        const SET_SIZE = 10;
-
-        // 음성 엔진 초기화 (사파리 필수)
         const synth = window.speechSynthesis;
 
         function initApp() {
+            // 1. 사파리 오디오 락 즉시 해제 (가장 중요)
+            const unlock = new SpeechSynthesisUtterance(" ");
+            synth.speak(unlock);
+
             document.getElementById('startScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
             
-            // iOS 사파리 음성 권한 획득 (빈 소리 재생)
-            const unlock = new SpeechSynthesisUtterance("");
-            synth.speak(unlock);
-            
             shuffle(allWords);
-            loadSet();
-        }
-
-        function loadSet() {
-            const start = setNumber * SET_SIZE;
-            currentWords = allWords.slice(start, start + SET_SIZE);
-            if (currentWords.length === 0) { setNumber = 0; loadSet(); return; }
-            currentIndex = 0;
+            currentWords = allWords.slice(0, 10);
             renderCard();
-            setTimeout(playCurrentWord, 100);
+            
+            // 첫 단어 발음 (약간의 지연을 주어 엔진 준비 시간 확보)
+            setTimeout(playCurrentWord, 300);
         }
 
         function renderCard() {
@@ -196,82 +175,71 @@
             document.getElementById('wordEn').textContent = word.en;
             document.getElementById('wordKo').textContent = word.ko;
             document.getElementById('progressIndicator').textContent = `${currentIndex + 1} / ${currentWords.length}`;
-            
             document.getElementById('prevBtn').classList.toggle('btn-disabled', currentIndex === 0);
-            document.getElementById('nextBtn').textContent = (currentIndex === currentWords.length - 1) ? "학습 완료" : "다음 단어 보기";
+            document.getElementById('nextBtn').textContent = (currentIndex === currentWords.length - 1) ? "결과 보기" : "다음 단어 보기";
         }
 
         function playCurrentWord() {
-            synth.cancel(); // 이전 음성 즉시 중단
+            // 이미 말하고 있다면 중단
+            synth.cancel();
 
             const word = currentWords[currentIndex];
-            const isKo = (word.lang === 'ko');
             const utter = new SpeechSynthesisUtterance(word.en);
             
-            // 아이폰 사파리 고품질 목소리 선택 로직
-            const voices = synth.getVoices();
-            if (isKo) {
+            // 언어별 최적화
+            if (word.lang === 'ko') {
                 utter.lang = 'ko-KR';
-                utter.rate = 1.0;
             } else {
                 utter.lang = 'en-US';
-                utter.rate = 0.95; // 자연스러운 일반 속도
-                utter.pitch = 1.0;
-                
-                // 사파리에서 가장 네이티브한 목소리 찾기
-                const premiumVoice = voices.find(v => v.lang.includes('en-US') && (v.name.includes('Samantha') || v.name.includes('Alex')));
-                if (premiumVoice) utter.voice = premiumVoice;
+                utter.rate = 1.0; // 아이폰 사파리에서 가장 자연스러운 속도
             }
-            
+
+            // 목소리 로딩 확인 및 재생
             synth.speak(utter);
+        }
+
+        // 사용자가 직접 버튼을 누른 경우의 핸들러
+        function handleSpeakClick(e) {
+            if(e) e.preventDefault();
+            playCurrentWord();
         }
 
         function nextCard() {
             if (isAnimating) return;
             if (currentIndex < currentWords.length - 1) {
-                animateCard('slide-left', () => {
+                switchCard('slide-next', () => {
                     currentIndex++;
                     renderCard();
                     playCurrentWord();
                 });
             } else {
-                showComplete();
+                document.getElementById('completeScreen').style.display = 'flex';
             }
         }
 
         function prevCard() {
             if (isAnimating || currentIndex === 0) return;
-            animateCard('slide-right', () => {
+            switchCard('slide-prev', () => {
                 currentIndex--;
                 renderCard();
                 playCurrentWord();
             });
         }
 
-        function animateCard(exitClass, callback) {
-            const box = document.getElementById('wordBox');
+        function switchCard(animClass, callback) {
+            const area = document.getElementById('cardArea');
             isAnimating = true;
-            box.classList.add(exitClass);
+            area.classList.add(animClass);
 
             setTimeout(() => {
                 callback();
-                box.classList.remove(exitClass);
-                box.classList.add('slide-in');
-                void box.offsetWidth;
-                box.classList.remove('slide-in');
+                area.classList.remove(animClass);
                 isAnimating = false;
             }, 250);
         }
 
-        function showComplete() {
-            document.getElementById('completeScreen').style.display = 'flex';
-            document.getElementById('resultText').textContent = `${currentWords.length}개 단어 학습을 완료했습니다!`;
-        }
-
         function restartApp() {
-            setNumber++;
-            document.getElementById('completeScreen').style.display = 'none';
-            loadSet();
+            location.reload();
         }
 
         function shuffle(array) {
@@ -281,18 +249,14 @@
             }
         }
 
-        // 목소리 목록 미리 불러오기 (일부 브라우저 대응)
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = () => synth.getVoices();
-        }
-
-        // 스와이프
+        // 스와이프 방지 및 지원
         let touchStartX = 0;
-        document.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
+        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
         document.addEventListener('touchend', e => {
             const diff = touchStartX - e.changedTouches[0].screenX;
-            if (Math.abs(diff) > 60) diff > 0 ? nextCard() : prevCard();
+            if (Math.abs(diff) > 70) diff > 0 ? nextCard() : prevCard();
         }, {passive: true});
+
     </script>
 </body>
 </html>
