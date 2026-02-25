@@ -135,7 +135,6 @@
             pointer-events: none;
         }
 
-        /* 완료 화면 */
         .complete-container {
             text-align: center;
             width: 100%;
@@ -235,7 +234,6 @@
     </div>
 
     <script>
-        // tts: 발음 텍스트, lang: 'en' 영어발음 / 'ko' 한글발음 (브랜드명 등)
         const allWords = [
             { en: "STARBUCKS", ko: "스타벅스", tts: "스타벅스", lang: "ko" },
             { en: "COFFEE", ko: "커피" },
@@ -316,7 +314,7 @@
             { en: "BACK", ko: "뒤로 (돌아가기)" }
         ];
 
-        // 셔플 (Fisher-Yates)
+        // 셔플
         function shuffle(arr) {
             for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -334,6 +332,7 @@
         let currentCard = 0;
         let isAnimating = false;
         let touchStartX = 0;
+        let audio = null;
 
         const container = document.getElementById('cardContainer');
         const completeEl = document.getElementById('completeContainer');
@@ -346,7 +345,6 @@
         function render() {
             const words = getSetWords();
             const w = words[currentCard];
-            const globalIndex = currentSet * SET_SIZE + currentCard + 1;
 
             document.getElementById('wordEn').textContent = w.en;
             document.getElementById('wordKo').textContent = w.ko;
@@ -357,14 +355,28 @@
                 currentCard === 0 ? 'nav-btn prev disabled' : 'nav-btn prev';
         }
 
+        // Google Translate TTS (모바일 호환 좋음)
         function playSound() {
-            window.speechSynthesis.cancel();
+            if (audio) {
+                audio.pause();
+                audio = null;
+            }
+
             const w = getSetWords()[currentCard];
             const isKo = w.lang === 'ko';
-            const u = new SpeechSynthesisUtterance(isKo ? w.tts : w.en);
-            u.lang = isKo ? 'ko-KR' : 'en-US';
-            u.rate = 0.75;
-            window.speechSynthesis.speak(u);
+            const text = isKo ? w.tts : w.en;
+            const lang = isKo ? 'ko' : 'en';
+
+            const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${lang}&q=${encodeURIComponent(text)}`;
+
+            audio = new Audio(url);
+            audio.play().catch(() => {
+                // Google TTS 실패 시 Web Speech API로 폴백
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = isKo ? 'ko-KR' : 'en-US';
+                u.rate = 0.75;
+                window.speechSynthesis.speak(u);
+            });
         }
 
         function goTo(newIndex, direction) {
@@ -418,11 +430,7 @@
                 `${currentSet + 1}세트 완료 (${setStart}~${setEnd}번 단어)`;
 
             const nextBtn = document.getElementById('completeNextBtn');
-            if (isLastSet) {
-                nextBtn.textContent = '처음부터 다시';
-            } else {
-                nextBtn.textContent = '다음으로';
-            }
+            nextBtn.textContent = isLastSet ? '처음부터 다시' : '다음으로';
 
             container.classList.add('fade-out-left');
 
@@ -435,12 +443,9 @@
 
         function goNextSet() {
             const isLastSet = currentSet >= totalSets - 1;
-            if (isLastSet) {
-                currentSet = 0;
-            } else {
-                currentSet++;
-            }
+            currentSet = isLastSet ? 0 : currentSet + 1;
             currentCard = 0;
+            if (isLastSet) shuffle(allWords);
             startSet();
         }
 
