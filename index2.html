@@ -17,7 +17,6 @@
             overflow: hidden;
         }
 
-        /* 시작 화면 */
         .start-screen {
             text-align: center;
             padding: 20px;
@@ -241,7 +240,6 @@
 </head>
 <body>
 
-    <!-- 시작 화면 -->
     <div class="start-screen" id="startScreen">
         <div class="start-title">오늘의 영어 단어</div>
         <div class="start-desc">매일 보는 영어,<br>이제 읽을 수 있어요</div>
@@ -375,21 +373,20 @@
         let currentCard = 0;
         let isAnimating = false;
         let touchStartX = 0;
-        let pendingSound = false;
+        let audio = null;
 
         const container = document.getElementById('cardContainer');
         const completeEl = document.getElementById('completeContainer');
 
-        // Safari TTS 잠금 해제: 사용자 터치 시 빈 음성 한번 실행
-        function unlockTTS() {
-            const u = new SpeechSynthesisUtterance('');
-            u.volume = 0;
-            window.speechSynthesis.speak(u);
+        // Audio 잠금 해제용 (Safari)
+        function unlockAudio() {
+            audio = new Audio();
+            audio.play().catch(() => {});
+            audio = null;
         }
 
-        // 시작 버튼 (사용자 터치로 TTS 잠금 해제)
         function startApp() {
-            unlockTTS();
+            unlockAudio();
             document.getElementById('startScreen').style.display = 'none';
             container.style.display = '';
             render();
@@ -414,39 +411,43 @@
                 currentCard === 0 ? 'nav-btn prev disabled' : 'nav-btn prev';
         }
 
+        // Google Translate TTS → 실패 시 Web Speech API 폴백
         function playSound() {
+            if (audio) {
+                audio.pause();
+                audio = null;
+            }
             window.speechSynthesis.cancel();
+
             const w = getSetWords()[currentCard];
             const isKo = w.lang === 'ko';
-            const u = new SpeechSynthesisUtterance(isKo ? w.tts : w.en);
-            u.lang = isKo ? 'ko-KR' : 'en-US';
-            u.rate = 0.75;
-            window.speechSynthesis.speak(u);
+            const text = isKo ? w.tts : w.en;
+            const lang = isKo ? 'ko' : 'en';
+
+            const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${lang}&q=${encodeURIComponent(text)}`;
+
+            audio = new Audio(url);
+            audio.play().catch(() => {
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = isKo ? 'ko-KR' : 'en-US';
+                u.rate = 0.75;
+                window.speechSynthesis.speak(u);
+            });
         }
 
-        // Safari에서는 setTimeout 안의 TTS가 막힘
-        // → 버튼 클릭 시 바로 소리 재생, 애니메이션은 별도 진행
-        function goTo(newIndex, direction, fromGesture) {
+        function goTo(newIndex, direction) {
             if (isAnimating) return;
             isAnimating = true;
 
-            // 다음 카드 데이터 미리 세팅해서 즉시 발음
+            // Safari: 사용자 터치 컨텍스트에서 바로 재생
             currentCard = newIndex;
-
-            if (fromGesture) {
-                render();
-                playSound();
-            } else {
-                pendingSound = true;
-            }
+            render();
+            playSound();
 
             const exitClass = direction === 'left' ? 'fade-out-left' : 'fade-out-right';
             container.classList.add(exitClass);
 
             setTimeout(() => {
-                if (!fromGesture) {
-                    render();
-                }
                 container.classList.remove(exitClass);
                 container.classList.add('fade-in');
                 void container.offsetWidth;
@@ -454,27 +455,22 @@
 
                 setTimeout(() => {
                     isAnimating = false;
-                    if (pendingSound) {
-                        pendingSound = false;
-                    }
                 }, 300);
             }, 300);
         }
 
         function nextCard() {
             const words = getSetWords();
-            const nextIndex = currentCard + 1;
             if (currentCard < words.length - 1) {
-                goTo(nextIndex, 'left', true);
-            } else if (currentCard === words.length - 1 && !isAnimating) {
+                goTo(currentCard + 1, 'left');
+            } else {
                 showComplete();
             }
         }
 
         function prevCard() {
-            const prevIndex = currentCard - 1;
             if (currentCard > 0) {
-                goTo(prevIndex, 'right', true);
+                goTo(currentCard - 1, 'right');
             }
         }
 
