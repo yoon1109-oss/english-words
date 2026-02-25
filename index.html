@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>영어 단어 카드</title>
     <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-main: #000000;
+            --text-sub: #888888;
+            --accent: #000000;
+            --button-bg: #f5f5f5;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -12,166 +20,317 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #ffffff;
+            background-color: var(--bg-color);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             overflow: hidden;
             -webkit-user-select: none;
-            user-select: none;
         }
 
+        /* 시작 화면 */
         .start-screen {
             text-align: center;
-            padding: 20px;
+            z-index: 100;
         }
 
-        .start-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #000;
-            margin-bottom: 8px;
-        }
-
-        .start-desc {
-            font-size: 1rem;
-            color: #999;
-            margin-bottom: 48px;
-            line-height: 1.5;
-        }
-
+        .start-title { font-size: 2rem; font-weight: 800; margin-bottom: 10px; }
         .start-btn {
-            background: #000;
-            color: #fff;
-            border: none;
-            padding: 16px 48px;
-            border-radius: 10px;
-            font-size: 1.05rem;
-            font-weight: 600;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
+            background: var(--accent); color: #fff; border: none;
+            padding: 16px 50px; border-radius: 12px; font-size: 1.1rem;
+            font-weight: 600; cursor: pointer;
         }
 
-        .card-container {
-            text-align: center;
-            width: 100%;
-            padding: 20px;
+        /* 메인 학습 컨테이너 */
+        .app-container {
             display: none;
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            max-width: 500px;
+            position: relative;
         }
 
-        .card-container.fade-out-left { opacity: 0; transform: translateX(-60px); }
-        .card-container.fade-out-right { opacity: 0; transform: translateX(60px); }
-        .card-container.fade-in { opacity: 0; transform: translateX(40px); }
-
-        .progress {
-            font-size: 0.75rem;
+        /* 상단 정보 */
+        .header {
+            padding: 20px;
+            text-align: center;
             color: #ccc;
-            margin-bottom: 40px;
+            font-size: 0.8rem;
             letter-spacing: 1px;
         }
 
+        /* 중앙 단어 카드 영역 */
+        .card-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .word-box {
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
         .word-en {
-            font-size: 3.8rem;
+            font-size: 3.5rem;
             font-weight: 800;
-            color: #000;
-            margin-bottom: 5px;
-            letter-spacing: -2px;
+            margin-bottom: 10px;
+            letter-spacing: -1.5px;
             word-break: keep-all;
-            line-height: 1.1;
         }
 
         .word-ko {
-            font-size: 1.4rem;
-            font-weight: 400;
-            color: #777;
-            margin-bottom: 15px;
+            font-size: 1.3rem;
+            color: var(--text-sub);
+            margin-bottom: 30px;
+        }
+
+        /* 애니메이션 클래스 */
+        .slide-left { opacity: 0; transform: translateX(-50px); }
+        .slide-right { opacity: 0; transform: translateX(50px); }
+        .slide-in { opacity: 0; transform: translateX(30px); }
+
+        /* 하단 고정 컨트롤러 */
+        .controls {
+            padding: 30px 20px 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
         .speak-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            background: #f5f5f5;
+            align-self: center;
+            background: var(--button-bg);
             border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: #555;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
             cursor: pointer;
-            margin-bottom: 80px;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        .button-group {
+        .nav-group {
             display: flex;
-            justify-content: center;
-            align-items: center;
             gap: 12px;
-            padding: 0 20px;
         }
 
         .nav-btn {
             flex: 1;
-            padding: 16px 0;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border-radius: 10px;
-            cursor: pointer;
+            padding: 18px;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
             border: none;
-            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+            transition: background 0.2s;
         }
 
-        .nav-btn.prev { background: #f5f5f5; color: #888; }
-        .nav-btn.next { background: #000; color: #fff; }
-        .nav-btn.disabled { background: #f5f5f5; color: #ddd; pointer-events: none; }
+        .btn-prev { background: var(--button-bg); color: #888; }
+        .btn-next { background: var(--accent); color: #fff; }
+        .btn-disabled { opacity: 0.3; pointer-events: none; }
 
-        .complete-container { text-align: center; width: 100%; padding: 20px; display: none; }
-        .complete-container.show { display: block; }
-        .complete-emoji { font-size: 48px; margin-bottom: 16px; }
-        .complete-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
-        .complete-btns { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 30px; }
-        .complete-btn { background: none; border: none; padding: 12px; font-size: 0.95rem; cursor: pointer; }
-        .complete-btn.primary { color: #000; font-weight: 600; }
-        .complete-btn.secondary { color: #bbb; }
+        /* 완료 화면 */
+        .complete-screen {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: white;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
     </style>
 </head>
 <body>
 
     <div class="start-screen" id="startScreen">
-        <div class="start-title">오늘의 영어 단어</div>
-        <div class="start-desc">원어민 발음과 억양으로 배우는<br>생활 필수 영단어</div>
-        <button class="start-btn" onclick="startApp()">학습 시작</button>
+        <div class="start-title">오늘의 단어</div>
+        <p style="color:#999; margin-bottom: 40px;">자연스러운 원어민 발음으로<br>영어를 익혀보세요</p>
+        <button class="start-btn" onclick="initApp()">학습 시작</button>
     </div>
 
-    <div class="card-container" id="cardContainer">
-        <div class="progress" id="progress"></div>
-        <div class="word-en" id="wordEn"></div>
-        <div class="word-ko" id="wordKo"></div>
+    <div class="app-container" id="appContainer">
+        <div class="header" id="progressIndicator">1 / 10</div>
+        
+        <div class="card-view">
+            <div class="word-box" id="wordBox">
+                <div class="word-en" id="wordEn">AMERICANO</div>
+                <div class="word-ko" id="wordKo">아메리카노</div>
+            </div>
+        </div>
 
-        <button class="speak-btn" onclick="playSound()">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-            </svg>
-            발음 듣기
-        </button>
-
-        <div class="button-group">
-            <button class="nav-btn prev" id="prevBtn" onclick="prevCard()">이전</button>
-            <button class="nav-btn next" id="nextBtn" onclick="nextCard()">다음 단어 보기</button>
+        <div class="controls">
+            <button class="speak-btn" onclick="playCurrentWord()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                발음 듣기
+            </button>
+            <div class="nav-group">
+                <button class="nav-btn btn-prev" id="prevBtn" onclick="prevCard()">이전</button>
+                <button class="nav-btn btn-next" id="nextBtn" onclick="nextCard()">다음 단어 보기</button>
+            </div>
         </div>
     </div>
 
-    <div class="complete-container" id="completeContainer">
-        <div class="complete-emoji">🎉</div>
-        <div class="complete-title">학습 완료!</div>
-        <div id="completeDesc" style="color:#999; margin-bottom: 20px;"></div>
-        <div class="complete-btns">
-            <button class="complete-btn primary" id="completeNextBtn" onclick="goNextSet()"></button>
-            <button class="complete-btn secondary" onclick="replaySet()">다시 보기</button>
-        </div>
+    <div class="complete-screen" id="completeScreen">
+        <span style="font-size: 4rem; margin-bottom: 20px;">🏆</span>
+        <h2 style="margin-bottom: 10px;">훌륭합니다!</h2>
+        <p id="resultText" style="color: #999; margin-bottom: 40px;"></p>
+        <button class="nav-btn btn-next" style="width: 200px;" onclick="restartApp()">다음 세트 시작</button>
     </div>
+
+    <audio id="ttsAudio" style="display:none;"></audio>
 
     <script>
         const allWords = [
-            { en: "STARBUCKS", ko: "스타벅스", tts: "스타벅스", lang: "ko" },
-            { en: "COFFEE", ko:
+            { en: "STARBUCKS", ko: "스타벅스", lang: "ko" },
+            { en: "COFFEE", ko: "커피" },
+            { en: "CAFE", ko: "카페" },
+            { en: "AMERICANO", ko: "아메리카노" },
+            { en: "HOT", ko: "핫 (뜨거운)" },
+            { en: "ICE", ko: "아이스 (차가운)" },
+            { en: "LATTE", ko: "라떼" },
+            { en: "DAISO", ko: "다이소", lang: "ko" },
+            { en: "OLIVE YOUNG", ko: "올리브영", lang: "ko" },
+            { en: "MART", ko: "마트" },
+            { en: "EMART", ko: "이마트", lang: "ko" },
+            { en: "SAMSUNG", ko: "삼성", lang: "ko" },
+            { en: "NIKE", ko: "나이키" },
+            { en: "SALE", ko: "세일 (할인)" },
+            { en: "EXIT", ko: "출구" },
+            { en: "WIFI", ko: "와이파이" },
+            { en: "OPEN", ko: "오픈" },
+            { en: "CLOSE", ko: "클로즈" },
+            { en: "PUSH", ko: "푸시 (미세요)" },
+            { en: "PULL", ko: "풀 (당기세요)" }
+        ];
+
+        let currentWords = [];
+        let currentIndex = 0;
+        let setNumber = 0;
+        let isAnimating = false;
+        const SET_SIZE = 10;
+
+        const audioPlayer = document.getElementById('ttsAudio');
+
+        function initApp() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'flex';
+            
+            // 사파리 오디오 락 해제
+            audioPlayer.play().catch(() => {}); 
+            
+            shuffle(allWords);
+            loadSet();
+        }
+
+        function loadSet() {
+            const start = setNumber * SET_SIZE;
+            currentWords = allWords.slice(start, start + SET_SIZE);
+            if (currentWords.length === 0) {
+                setNumber = 0;
+                loadSet();
+                return;
+            }
+            currentIndex = 0;
+            renderCard();
+            playCurrentWord();
+        }
+
+        function renderCard() {
+            const word = currentWords[currentIndex];
+            document.getElementById('wordEn').textContent = word.en;
+            document.getElementById('wordKo').textContent = word.ko;
+            document.getElementById('progressIndicator').textContent = `${currentIndex + 1} / ${currentWords.length}`;
+            
+            document.getElementById('prevBtn').classList.toggle('btn-disabled', currentIndex === 0);
+            document.getElementById('nextBtn').textContent = (currentIndex === currentWords.length - 1) ? "학습 완료" : "다음 단어 보기";
+        }
+
+        // 새로운 고퀄리티 Google TTS 적용
+        function playCurrentWord() {
+            const word = currentWords[currentIndex];
+            const lang = word.lang === 'ko' ? 'ko' : 'en';
+            const text = word.en;
+            
+            // Google Translate TTS URL (자연스러운 억양)
+            // 클라이언트 인증 파라미터를 추가하여 사파리 호환성 증대
+            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
+            
+            audioPlayer.src = ttsUrl;
+            audioPlayer.play().catch(e => {
+                console.log("Audio play blocked, waiting for interaction.");
+            });
+        }
+
+        function nextCard() {
+            if (isAnimating) return;
+            if (currentIndex < currentWords.length - 1) {
+                animateCard('slide-left', () => {
+                    currentIndex++;
+                    renderCard();
+                    playCurrentWord();
+                });
+            } else {
+                showComplete();
+            }
+        }
+
+        function prevCard() {
+            if (isAnimating || currentIndex === 0) return;
+            animateCard('slide-right', () => {
+                currentIndex--;
+                renderCard();
+                playCurrentWord();
+            });
+        }
+
+        function animateCard(exitClass, callback) {
+            const box = document.getElementById('wordBox');
+            isAnimating = true;
+            box.classList.add(exitClass);
+
+            setTimeout(() => {
+                callback();
+                box.classList.remove(exitClass);
+                box.classList.add('slide-in');
+                void box.offsetWidth; // 리플로우 강제
+                box.classList.remove('slide-in');
+                isAnimating = false;
+            }, 300);
+        }
+
+        function showComplete() {
+            document.getElementById('completeScreen').style.display = 'flex';
+            document.getElementById('resultText').textContent = `${currentWords.length}개의 단어를 마스터했습니다!`;
+        }
+
+        function restartApp() {
+            setNumber++;
+            document.getElementById('completeScreen').style.display = 'none';
+            loadSet();
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // 스와이프 지원
+        let touchStartX = 0;
+        document.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
+        document.addEventListener('touchend', e => {
+            const diff = touchStartX - e.changedTouches[0].screenX;
+            if (Math.abs(diff) > 50) diff > 0 ? nextCard() : prevCard();
+        }, {passive: true});
+    </script>
+</body>
+</html>
